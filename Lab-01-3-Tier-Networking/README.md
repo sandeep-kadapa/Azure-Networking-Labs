@@ -52,13 +52,13 @@ The lab implements a 3-tier application architecture in Azure:
 
 ### VNet Topology
 
-![Azure VNet Topology](./screenshots/VNet-topology.png)
+![Azure VNet Topology](Screenshots/VNet-topology.png)
 
 The VNet contains separate subnets for the Web, Application, Database, and Azure Bastion components. This provides logical network segmentation between application tiers.
 
 ### VNet and Subnets
 
-![VNet and Subnets](./screenshots/VNet-Subnets.png)
+![VNet and Subnets](Screenshots/VNet-Subnets.png)
 
 
 Management Access:
