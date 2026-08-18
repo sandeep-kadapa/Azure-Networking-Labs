@@ -107,8 +107,8 @@ Rather than only studying individual services, I am building complete environmen
 | NAT Gateway         | Controlled outbound internet connectivity |
 
 
-👨‍💻 Author
 
-Sandeep Kadapa
+                                                                                                      👨‍💻 Author
 
-Azure | Cloud | Networking | IAM
+                                                                                                      Sandeep Kadapa
+                                                                                            Azure | Cloud | Networking | IAM
