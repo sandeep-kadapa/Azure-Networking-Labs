@@ -178,3 +178,200 @@ Web → App :443           ALLOWED
 App → DB :1433           ALLOWED
 Web → DB :1433           DENIED
 ```
+
+## Network Security Groups and Application Security Groups
+
+### Application Security Groups
+
+Application Security Groups (ASGs) were used to logically group VMs according to their application role.
+
+| ASG | Associated Tier | Purpose |
+|---|---|---|
+| ASG-Web | Web VMs | Represents the Web tier |
+| ASG-App | Application VMs | Represents the Application tier |
+| ASG-DB | Database VM | Represents the Database tier |
+
+ASGs allow NSG rules to reference application roles instead of maintaining individual VM IP addresses.
+
+### ASG Configuration
+
+![ASG-Web](./Screenshots/ASG-Web.png)
+
+![ASG-App](./Screenshots/ASG-App.png)
+
+![ASG-DB](./Screenshots/ASG-DB.png)
+
+### Network Security Groups
+
+NSGs were used to control inbound traffic between the application tiers.
+
+The main security requirements were:
+
+| Source | Destination | Port | Protocol | Action |
+|---|---|---:|---|---|
+| Internet | Web | 80 | TCP | Allow |
+| Web | Application | 443 | TCP | Allow |
+| Application | Database | 1433 | TCP | Allow |
+| Web | Database | 1433 | TCP | Deny |
+
+### Database NSG
+
+The Database NSG allows TCP 1433 only when the source belongs to `ASG-App`.
+
+![NSG-DB Inbound Rules](./Screenshots/NSG-DB-inbound-rules.png)
+
+### Web NSG
+
+The Web NSG was configured to permit the required inbound Web traffic.
+
+![NSG-Web Inbound Rules](./Screenshots/NSG-Web-Inbound-Rules.png)
+
+## Connectivity Testing
+
+Network connectivity was tested from the VMs using `nc` (Netcat).
+
+### Application → Database
+
+The Application VM successfully connected to the Database VM on TCP 1433.
+
+```text
+azureuser@app-vm-01:~$ nc -vz 10.10.3.4 1433
+Connection to 10.10.3.4 1433 port [tcp/ms-sql-s] succeeded!
+```
+
+Result: ALLOWED
+
+This confirms that the NSG rule allowing ASG-App → ASG-DB on TCP 1433 was working as intended.
+
+###Web → Database
+
+The Web VM was tested against the Database VM on TCP 1433.
+azureuser@web-vm-01:~$ nc -vz 10.10.3.4 1433
+Connection timed out
+
+Result: DENIED
+
+This confirms that Web-tier traffic was not permitted to directly access the Database tier on TCP 1433.
+
+## Azure Load Balancer
+
+An Azure Load Balancer was deployed in front of the Web tier to distribute incoming TCP traffic across the Web VMs.
+
+### Load Balancer Frontend
+
+The Load Balancer provides a frontend IP address through which clients access the Web application.
+
+![Load Balancer Frontend](./Screenshots/LoadBalancer-Frontend.png)
+
+### Backend Pool
+
+Both Web VMs were configured as backend targets of the Load Balancer.
+
+![Backend Pool Configuration](./Screenshots/backend-pool-configuration.png)
+
+### Health Probe
+
+A TCP health probe was configured to monitor the availability of the Web VMs.
+
+![Health Probe](./Screenshots/Health-probe.png)
+
+### Load-Balancing Rule
+
+A load-balancing rule was configured to receive traffic on TCP port 80 and distribute it to the healthy backend Web VMs.
+
+![Load Balancing Rule](./Screenshots/Load-Balancing-Rule.png)
+
+## Load Balancer Traffic Distribution
+
+The Load Balancer was tested by accessing the frontend endpoint from a browser.
+
+Traffic was successfully served by the Web tier through the Load Balancer.
+
+![Web VM Responses](./Screenshots/Web-VM-responses.png)
+
+The test confirmed that the Load Balancer was able to forward client traffic to the backend Web VMs.
+
+## Load Balancer Failover Test
+
+To validate backend health monitoring and failover behavior, `web-vm-01` was stopped while `web-vm-02` remained running.
+
+After the health probe detected that `web-vm-01` was unavailable, the Load Balancer continued serving traffic through the healthy backend VM.
+
+![Browser After Stopping VM1](./Screenshots/Browser%20after%20stopping%20VM1%20showing%20VM2%20serving%20traffic.png)
+
+### Result
+
+```text
+Before VM failure
+        |
+        v
+Azure Load Balancer
+        |
+   +----+----+
+   |         |
+ VM01       VM02
+ Healthy    Healthy
+
+
+After VM01 was stopped
+        |
+        v
+Azure Load Balancer
+        |
+        X
+      VM01
+        |
+        v
+      VM02
+     Healthy
+        |
+        v
+     Response
+```
+
+The test demonstrated that the Load Balancer removed the unhealthy backend from traffic distribution and continued serving requests through the healthy Web VM.
+
+
+## Lessons Learned
+
+This lab reinforced several important Azure networking concepts through hands-on implementation and troubleshooting:
+
+- Network segmentation using Azure Virtual Networks and subnets
+- Using ASGs to represent application tiers in NSG rules
+- Controlling east-west traffic using NSGs
+- Understanding the difference between allowed and denied connectivity
+- Using Azure Bastion for private VM administration
+- Configuring an Azure Load Balancer with frontend, backend pool, health probe, and load-balancing rule
+- Understanding how health probes affect backend traffic distribution
+- Validating network behavior using `nc` connectivity tests
+- Troubleshooting connectivity based on connection timeout and connection refusal behavior
+- Testing Load Balancer failover by intentionally stopping a backend VM
+
+
+## AZ-104 Networking Concepts Demonstrated
+
+This lab provided practical experience with the following Azure networking concepts:
+
+- Azure Virtual Network (VNet)
+- Subnetting and network segmentation
+- Network Security Groups (NSGs)
+- Application Security Groups (ASGs)
+- Azure Bastion
+- Azure Load Balancer
+- Backend pools
+- Health probes
+- Load-balancing rules
+- Private IP-based VM communication
+- TCP connectivity testing
+- Network security and traffic-flow validation
+- Load Balancer health monitoring and failover
+
+## Conclusion
+
+This lab successfully implemented and validated a 3-tier application network in Azure.
+
+The environment included Web, Application, and Database tiers with controlled communication using NSGs and ASGs. Azure Bastion provided private VM administration, while Azure Load Balancer provided traffic distribution and backend failover.
+
+The implementation was validated through real connectivity tests and an intentional backend VM failure scenario.
+
+**Status: Completed**
