@@ -16,7 +16,7 @@ The lab implements a 3-tier application architecture in Azure:
 - Application Tier — handles application-level communication
 - Database Tier — provides database connectivity
 - Azure Bastion — provides secure management access to private VMs
-- Azure Load Balancer — distributes incoming HTTP traffic across Web VMs
+- Azure Load Balancer — Distributes TCP/HTTP traffic across Web VMs
 
 ### Architecture Diagram
 
@@ -48,7 +48,7 @@ The lab implements a 3-tier application architecture in Azure:
                    v
                 DB VM 01
                 ASG-DB
-
+```
 
 ### VNet Topology
 
@@ -60,21 +60,72 @@ The VNet contains separate subnets for the Web, Application, Database, and Azure
 
 ![VNet and Subnets](./Screenshots/VNet-Subnets.png)
 
+## Azure Resources
 
-Management Access:
+The following Azure resources were created as part of this lab:
 
+| Resource | Purpose |
+|---|---|
+| Virtual Network | Provides the private network environment |
+| Web Subnet | Hosts the Web tier VMs |
+| App Subnet | Hosts the Application tier VMs |
+| DB Subnet | Hosts the Database tier VM |
+| AzureBastionSubnet | Provides secure administrative access to private VMs |
+| Web VMs | Hosts the Web tier |
+| App VMs | Hosts the Application tier |
+| DB VM | Hosts the Database tier |
+| Network Security Groups | Controls inbound and outbound network traffic |
+| Application Security Groups | Groups VMs based on application roles |
+| Azure Load Balancer | Distributes traffic across Web VMs |
+| Azure Bastion | Provides secure SSH access without exposing VM SSH ports |
+
+## Network Configuration
+
+### Virtual Network
+
+| Configuration | Value |
+|---|---|
+| VNet Name | `vnet-az104-lab1` |
+| Address Space | `10.10.0.0/16` |
+
+### Subnets
+
+| Subnet | Address Range | Purpose |
+|---|---|---|
+| WebSubnet | `10.10.1.0/24` | Web tier |
+| AppSubnet | `10.10.2.0/24` | Application tier |
+| DBSubnet | `10.10.3.0/24` | Database tier |
+| AzureBastionSubnet | `10.10.4.0/26` | Azure Bastion |
+
+### Virtual Machines
+
+| VM | Tier | Private IP |
+|---|---|---|
+| web-vm-01 | Web | `10.10.1.4` |
+| web-vm-02 | Web | `10.10.1.5` |
+| app-vm-01 | Application | `10.10.2.4` |
+| app-vm-02 | Application | `10.10.2.5` |
+| db-vm-01 | Database | `10.10.3.4` |
+
+### Management Access
+
+Azure Bastion was used to securely connect to the private VMs without exposing SSH ports directly to the Internet.
+
+```text
 Administrator
      |
- Internet
+  Internet
      |
  Azure Bastion
      |
  Azure VNet
      |
  Private VMs
+```
 
-Network Segmentation:
+### Network Segmentation
 
+```text
 VNet: 10.10.0.0/16
 |
 +-- WebSubnet
@@ -96,9 +147,11 @@ VNet: 10.10.0.0/16
 |
 +-- AzureBastionSubnet
     10.10.4.0/26
+```
 
-Traffic Flow:
+### Traffic Flow
 
+```text
 Internet
    |
    | TCP 80
@@ -115,11 +168,13 @@ Application Tier
    | TCP 1433
    v
 Database Tier
+```
 
-Security Flow:
+### Security Flow
 
+```text
 Internet → Web :80       ALLOWED
 Web → App :443           ALLOWED
 App → DB :1433           ALLOWED
 Web → DB :1433           DENIED
-
+```
