@@ -36,3 +36,82 @@ of backend path handling.
 - Validate backend health
 - Test backend failure detection
 - Troubleshoot backend path routing
+
+## Architecture
+
+The lab uses Azure Application Gateway as the public entry point for
+HTTP traffic.
+
+The Application Gateway routes requests to different backend VMs
+based on the URL path.
+
+### Traffic Flow
+
+```text
+                         Internet
+                            |
+                            | HTTP :80
+                            v
+                 Azure Application Gateway
+                       Public IP
+                            |
+                     HTTP Listener
+                            |
+                 +----------+----------+
+                 |                     |
+              /web/*                /app/*
+                 |                     |
+                 v                     v
+             bp-web                  bp-app
+                 |                     |
+                 v                     v
+            web-vm-01              app-vm-01
+            10.20.1.4              10.20.2.4
+                 |                     |
+                 +----------+----------+
+                            |
+                       NAT Gateway
+                            |
+                         Internet
+```
+
+###Management Access
+Administrator
+     |
+  Internet
+     |
+ Azure Bastion
+     |
+ Azure VNet
+     |
+ Private VMs
+
+ ```markdown
+## Network Configuration
+
+### VNet
+
+| Configuration | Value |
+|---|---|
+| VNet Name | `vnet-az104-lab2-appgw` |
+| Address Space | `10.20.0.0/16` |
+
+### Subnets
+
+| Subnet | Address Range | Purpose |
+|---|---|---|
+| AppGatewaySubnet | `10.20.0.0/24` | Azure Application Gateway |
+| WebSubnet | `10.20.1.0/24` | Web backend VM |
+| AppSubnet | `10.20.2.0/24` | Application backend VM |
+| AzureBastionSubnet | `10.20.3.0/26` | Azure Bastion |
+
+### Backend VMs
+
+| VM | Tier | Private IP |
+|---|---|---|
+| `web-vm-01` | Web | `10.20.1.4` |
+| `app-vm-01` | Application | `10.20.2.4` |
+
+### VNet and Subnets
+
+![VNet Subnets](./Screenshots/VNet-Subnets.png)
