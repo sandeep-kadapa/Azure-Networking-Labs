@@ -65,7 +65,62 @@ A practical 3-tier application architecture was implemented in Azure:
                    v
                 DB VM 01
                 ASG-DB
+```
 
+## Lab 02 — Application Gateway with Path-Based Routing
+
+### Architecture
+
+The lab uses Azure Application Gateway as the public Layer 7 entry point.
+
+Backend VMs remain private and are accessed through Application Gateway for application traffic, Azure Bastion for administration, and NAT Gateway for outbound Internet connectivity.
+
+### Architecture Diagram
+
+```text
+                              Internet
+                                  |
+                                  | HTTP :80
+                                  v
+                    +---------------------------+
+                    |   Azure Application       |
+                    |        Gateway            |
+                    |      Standard V2          |
+                    |       Public IP            |
+                    +-------------+-------------+
+                                  |
+                     HTTP Listener / Path Routing
+                                  |
+                    +-------------+-------------+
+                    |                           |
+                 /web/*                      /app/*
+                    |                           |
+                    v                           v
+              +-----------+               +-----------+
+              |  bp-web   |               |  bp-app   |
+              +-----+-----+               +-----+-----+
+                    |                           |
+                    v                           v
+              web-vm-01                   app-vm-01
+              10.20.1.4                   10.20.2.4
+                    |                           |
+                    +-------------+-------------+
+                                  |
+                           NAT Gateway
+                                  |
+                                  v
+                              Internet
+
+
+                    Administrator
+                          |
+                          v
+                    Azure Bastion
+                          |
+                          v
+                     Private VMs
+
+```
 
 🎓 AZ-104 Preparation
 
@@ -108,7 +163,4 @@ Rather than only studying individual services, I am building complete environmen
 
 
 
-                                                                                                      👨‍💻 Author
-
-                                                                                                      Sandeep Kadapa
-                                                                                            Azure | Cloud | Networking | IAM
+👨‍💻 Author - Sandeep Kadapa | Azure | Cloud | IAM | ITIL |
