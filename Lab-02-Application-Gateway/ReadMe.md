@@ -81,7 +81,7 @@ Backend VMs remain private and are accessed through Application Gateway for appl
 
 ```
 
-##Traffic Model
+## Traffic Model
 
 | Traffic Type                | Azure Service       | Destination         |
 | --------------------------- | ------------------- | ------------------- |
@@ -90,15 +90,15 @@ Backend VMs remain private and are accessed through Application Gateway for appl
 | Outbound Internet traffic   | NAT Gateway         | Internet            |
 
 
-##Network Configuration
-###Virtual Network:
+## Network Configuration
+### Virtual Network:
 | Configuration | Value                   |
 | ------------- | ----------------------- |
 | VNet Name     | `vnet-az104-lab2-appgw` |
 | Address Space | `10.20.0.0/16`          |
 | Region        | East US                 |
 
-###Subnets
+### Subnets
 | Subnet             | Address Range  | Purpose                   |
 | ------------------ | -------------- | ------------------------- |
 | AppGatewaySubnet   | `10.20.0.0/24` | Azure Application Gateway |
@@ -106,13 +106,13 @@ Backend VMs remain private and are accessed through Application Gateway for appl
 | AppSubnet          | `10.20.2.0/24` | Application backend       |
 | AzureBastionSubnet | `10.20.3.0/26` | Azure Bastion             |
 
-###Backend Virtual Machines
+### Backend Virtual Machines
 | VM          | Tier        | Private IP  |
 | ----------- | ----------- | ----------- |
 | `web-vm-01` | Web         | `10.20.1.4` |
 | `app-vm-01` | Application | `10.20.2.4` |
 
-##Application Gateway Configuration
+## Application Gateway Configuration
 
 Azure Application Gateway was deployed as the public Layer 7 entry point for the application.
 
@@ -125,7 +125,7 @@ Layer 7 request routing
 Health probing
 Path-based routing
 
-###Application Gateway
+### Application Gateway
 | Configuration      | Value                   |
 | ------------------ | ----------------------- |
 | Name               | `agw-az104-lab2`        |
@@ -140,7 +140,7 @@ Path-based routing
 | Subnet             | `AppGatewaySubnet`      |
 | Subnet Range       | `10.20.0.0/24`          |
 
-###Frontend Configuration
+### Frontend Configuration
 
 A static Standard Public IP was configured as the Application Gateway frontend.
 
@@ -152,7 +152,7 @@ A static Standard Public IP was configured as the Application Gateway frontend.
 | Assignment     | Static               |
 | Availability   | Zone Redundant       |
 
-###Backend Pools
+### Backend Pools
 
 Two backend pools were configured for the application.
 
@@ -163,7 +163,7 @@ Two backend pools were configured for the application.
 
 The backend VMs remain private and receive application traffic through Application Gateway.
 
-###Backend HTTP Settings
+### Backend HTTP Settings
 
 HTTP backend settings were configured for communication between Application Gateway and the Apache web servers.
 | Configuration    | Value      |
@@ -174,7 +174,7 @@ HTTP backend settings were configured for communication between Application Gate
 
 The backend VMs were running Apache HTTP Server on port 80.
 
-###HTTP Listener
+### HTTP Listener
 
 An HTTP listener was configured to receive incoming requests through the Application Gateway public frontend.
 | Configuration | Value           |
@@ -184,60 +184,60 @@ An HTTP listener was configured to receive incoming requests through the Applica
 | Port          | 80              |
 | Frontend      | Public IP       |
 
-###Path-Based Routing
+### Path-Based Routing
 
 Application Gateway was configured with path-based routing to direct incoming HTTP requests to different backend pools based on the URL path.
 
 This demonstrates Layer 7 routing, where Application Gateway can inspect the HTTP request and make a routing decision based on the URL.
 
-###Routing Configuration
+### Routing Configuration
 | URL Path | Backend Pool | Backend VM  |
 | -------- | ------------ | ----------- |
 | `/web/*` | `bp-web`     | `web-vm-01` |
 | `/app/*` | `bp-app`     | `app-vm-01` |
 
 
-##Path-Based Routing Testing
+## Path-Based Routing Testing
 
 The path-based routing configuration was tested through the Application Gateway public IP.
 
-###Default Route
+### Default Route
 
 Accessing the Application Gateway public IP without a specific path routed the request to the Web backend.
 
 http://<Application-Gateway-Public-IP>/
 ![Default Route](./Screenshots/Browser-Test-Default-traffic.png)
 
-###Web Path
+### Web Path
 
 Accessing the /web/ path routed the request to the Web backend pool.
 
 http://<Application-Gateway-Public-IP>/web/
 ![Web Path](./Screenshots/Browser-Test-Web-traffic.png)
 
-###Application Path
+### Application Path
 
 Accessing the /app/ path routed the request to the Application backend pool.
 
 http://<Application-Gateway-Public-IP>/app/
 ![Application Traffic](./Screenshots/Browser-Test-App-traffic.png)
 
-##Backend Health and Health Probes
+## Backend Health and Health Probes
 
 Application Gateway uses health probes to determine whether backend targets are available to receive traffic.
 
-###Backend Configuration
+### Backend Configuration
 | Backend Pool | Backend VM  | Protocol | Port |
 | ------------ | ----------- | -------- | ---- |
 | `bp-web`     | `web-vm-01` | HTTP     | 80   |
 | `bp-app`     | `app-vm-01` | HTTP     | 80   |
 
-##Backend Health
+## Backend Health
 
 Backend health was verified through the Application Gateway Backend Health section.
 ![Backend Health](./Screenshots/App-GW-Backend-Health.png)
 
-##Health Probe Failure Test
+## Health Probe Failure Test
 
 To validate Application Gateway health monitoring, web-vm-01 was intentionally stopped.
 
@@ -246,11 +246,11 @@ After the VM was stopped, the health probe detected that the backend was no long
 
 The VM was subsequently started again and backend health was verified.
 
-###Result
+### Result
 
 This test demonstrated that Application Gateway uses backend health status when determining whether a backend is available to receive application traffic.
 
-##NAT Gateway and Outbound Connectivity
+## NAT Gateway and Outbound Connectivity
 
 The backend VMs were deployed without public IP addresses.
 
@@ -258,7 +258,7 @@ Azure NAT Gateway was configured to provide outbound Internet connectivity for t
 
 This allowed the VMs to access external services such as Ubuntu package repositories without assigning public IP addresses directly to the VMs.
 
-###Nat Gateway Configuration
+### Nat Gateway Configuration
 | Configuration      | Value                       |
 | ------------------ | --------------------------- |
 | NAT Gateway        | `nat-az104-lab2`            |
@@ -268,7 +268,7 @@ This allowed the VMs to access external services such as Ubuntu package reposito
 
 ![Nat Gateway Configuration](./Screenshots/NAT-Configuration.png)
 
-###Outbound Connectivity Test
+### Outbound Connectivity Test
 
 Outbound connectivity was verified from both backend VMs using:
 
@@ -280,33 +280,33 @@ Both VMs returned the public IP associated with the NAT Gateway.
 
 ![App VM](./Screenshots/App-VM-NAT-PublicIP.png)
 
-###Result
+### Result
 
 The test confirmed that private backend VMs could access the Internet through NAT Gateway while remaining without directly assigned public IP addresses.
 
-##Azure Bastion and Private VM Management
+## Azure Bastion and Private VM Management
 
 Azure Bastion was used to provide secure administrative access to the private backend VMs.
 
 The backend VMs did not require public IP addresses for SSH administration.
 
-###Bastion Connectivity
+### Bastion Connectivity
 
 A Bastion session was established to the private VM and the Apache service was verified.
 
-###Result
+### Result
 
 The test confirmed that private VMs could be administered through Azure Bastion without exposing SSH directly to the Internet.
 
-#Troubleshooting
+# Troubleshooting
 
-##Issue: /app/ Returned HTTP 404
+## Issue: /app/ Returned HTTP 404
 
 During testing of the path-based routing configuration, the /app/ request initially returned an Apache 404 Not Found response.
 
 The Application Gateway routing itself was working because the request was reaching the Application backend VM.
 
-###Root Cause
+### Root Cause
 
 Application Gateway was correctly routing /app/ to app-vm-01.
 
@@ -320,7 +320,7 @@ Therefore, Apache returned:  404 Not Found
 
 This confirmed that the issue was related to backend path handling rather than Application Gateway backend connectivity.
 
-###Resolution
+### Resolution
 
 The Application Gateway backend setting was updated to use:
 
@@ -334,11 +334,11 @@ APP BACKEND
 app-vm-01
 Azure Application Gateway Lab 2
 
-##Security Design
+## Security Design
 
 The lab follows a private-backend architecture.
 
-###Key Security Principles
+### Key Security Principles
 Backend VMs do not require public IP addresses.
 Application Gateway acts as the public application entry point.
 Azure Bastion provides administrative access to private VMs.
@@ -347,7 +347,7 @@ Application Gateway health probes monitor backend availability.
 Backend workloads are separated into dedicated subnets.
 Application traffic is routed through Application Gateway instead of exposing backend VMs directly.
 
-##Key Learnings
+## Key Learnings
 
 This lab provided hands-on experience with Azure Application Gateway and supporting Azure networking services.
 
@@ -368,17 +368,17 @@ Implemented:
 
 This demonstrated how a single Application Gateway endpoint can route requests to different backend applications based on the URL path.
 
-###NAT Gateway
+### NAT Gateway
 
 Configured NAT Gateway to provide outbound Internet connectivity for private VMs.
 
 Both backend VMs used the NAT Gateway public IP for outbound Internet access while remaining without directly assigned public IP addresses.
 
-###Azure Bastion
+### Azure Bastion
 
 Used Azure Bastion to securely connect to private VMs for administration without exposing SSH directly to the Internet.
 
-###Troubleshooting
+### Troubleshooting
 
 Encountered and resolved an Application Gateway backend path issue where /app/ initially returned 404 Not Found.
 
@@ -388,7 +388,7 @@ Override backend path: /
 
 This demonstrated the importance of troubleshooting the complete request path rather than assuming that a healthy backend automatically means a successful application response.
 
-###Technologies Used
+### Technologies Used
 Microsoft Azure
 Azure Virtual Network
 Azure Application Gateway Standard V2
@@ -401,7 +401,7 @@ HTTP / TCP
 Layer 7 path-based routing
 Application Gateway health probes
 
-##Project Outcome
+## Project Outcome
 
 The lab successfully demonstrated a practical Azure Application Gateway architecture with private backend workloads.
 
@@ -422,7 +422,7 @@ End-to-end application traffic testing
 
 The final design separates inbound application traffic, administrative access, and outbound Internet connectivity using dedicated Azure services.
 
-##Lab Cost
+## Lab Cost
 
 The lab was created as a temporary hands-on environment and deleted after testing to minimize Azure costs.
 
