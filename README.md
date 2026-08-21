@@ -134,10 +134,10 @@ Rather than only studying individual services, I am building complete environmen
 
 🚀 Lab Progress
 
-| Lab    | Topic                             | Status      |
-| ------ | --------------------------------- | ----------- |
+| Lab    | Topic                             | Status       |
+| ------ | --------------------------------- | ------------ |
 | Lab 01 | 3-Tier Networking + Load Balancer | ✅ Completed |
-| Lab 02 | Application Gateway               | 🔲 Planned  |
+| Lab 02 | Application Gateway               | ✅ Completed |
 | Lab 03 | Azure Firewall + UDR              | 🔲 Planned  |
 | Lab 04 | VNet Peering + VPN Gateway        | 🔲 Planned  |
 
